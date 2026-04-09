@@ -16,6 +16,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void logout() async {
     await _authService.signOut();
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const AuthenticationScreen()),
@@ -23,6 +24,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void changePassword() async {
+    if (_newPasswordController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Password must be at least 6 characters")),
+      );
+      return;
+    }
+
     try {
       await _authService.changePassword(_newPasswordController.text);
 
@@ -31,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text("Error updating password")),
       );
     }
   }
@@ -46,7 +55,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text("Email: ${user?.email ?? "No user"}"),
+            Text(
+              "Email: ${user?.email ?? "No user"}",
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
 
             const SizedBox(height: 20),
 
@@ -56,6 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const InputDecoration(labelText: "New Password"),
               obscureText: true,
             ),
+
+            const SizedBox(height: 10),
 
             ElevatedButton(
               onPressed: changePassword,
