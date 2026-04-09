@@ -11,12 +11,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _newPasswordController =
+  final TextEditingController _passwordController =
       TextEditingController();
 
   void logout() async {
     await _authService.signOut();
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const AuthenticationScreen()),
@@ -24,25 +23,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void changePassword() async {
-    if (_newPasswordController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Password must be at least 6 characters")),
-      );
-      return;
-    }
+    if (_passwordController.text.length < 6) return;
 
-    try {
-      await _authService.changePassword(_newPasswordController.text);
+    await _authService.changePassword(_passwordController.text);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Password updated")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating password")),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Password updated")),
+    );
   }
 
   @override
@@ -52,19 +39,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Profile")),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Text(
-              "Email: ${user?.email ?? "No user"}",
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            CircleAvatar(
+              radius: 40,
+              child: Text(
+                user?.email?[0].toUpperCase() ?? "U",
+                style: const TextStyle(fontSize: 30),
+              ),
             ),
 
             const SizedBox(height: 20),
 
+            Text(
+              user?.email ?? "",
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 30),
+
             TextField(
-              controller: _newPasswordController,
+              controller: _passwordController,
               decoration:
                   const InputDecoration(labelText: "New Password"),
               obscureText: true,
@@ -81,6 +78,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             ElevatedButton(
               onPressed: logout,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
               child: const Text("Logout"),
             ),
           ],
